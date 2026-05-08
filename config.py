@@ -1,2 +1,2 @@
 
-GATEWAY_URL = "http://10.0.0.36:8000"
+GATEWAY_URL = "http://localhost:8000"
