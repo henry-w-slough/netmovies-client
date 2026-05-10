@@ -3,19 +3,15 @@ import uuid
 import config
 
 
-print(config.GATEWAY_URL)
-
-
 running = True
 while running:
-
     
 
     user_input = input(": ")
 
 
     if user_input == "create":
-        print(ClientHTTP.create_movie(input("Name of new movie: "), input("Description of new movie: ")).json()["status"])
+        print(ClientHTTP.create_movie(input("Name of new movie: "), input("Description of new movie: ")))
 
 
     elif user_input == "list":
