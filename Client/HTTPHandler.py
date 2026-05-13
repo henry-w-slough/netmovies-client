@@ -1,13 +1,21 @@
 import httpx
 import config
 import uuid
+import os
 
 
-def create_movie(name: str, description: str):
-    with httpx.Client(timeout=30.0) as client:
+def create_movie(name: str, description: str) -> dict | None:
+    
+    with httpx.Client() as client:
+        
+        if len(description) == 0:
+            movie_json = {"name": name}
+        else:
+            movie_json = {"name": name, "description": description}
+
         metadata_response = send_request(client.post,
             f"{config.GATEWAY_URL}/metadata/movie/createMovie",
-            json={"name": name, "description": description}
+            json=movie_json
         )
         if metadata_response is None:
             return None
@@ -18,47 +26,57 @@ def create_movie(name: str, description: str):
             f"{config.GATEWAY_URL}/storage/movies",
             json={"storage_id": new_movie["storageId"]}
         )
+
         if storage_response is None:
             return None
 
     return new_movie
 
 
-def get_all_movies():
+def get_all_movies() -> dict | None:
     with httpx.Client() as client:
         metadata_response = send_request(client.get,
             f"{config.GATEWAY_URL}/metadata/movie/getAllMovies"
         )
         if metadata_response is None:
-            return {}
-        return metadata_response.json()
+            return None
+    return metadata_response.json()
 
 
-def delete_movie_by_storage_id(storage_id: uuid.UUID):
+
+def delete_movie_by_storage_id(storage_id: uuid.UUID) -> httpx.Response | None:
     with httpx.Client() as client:
-        send_request(client.delete,
+        return send_request(client.delete,
             f"{config.GATEWAY_URL}/metadata/movie/deleteMovieByStorageId/{storage_id}"
-        )
-        send_request(client.delete,
+        ) and send_request(client.delete,
             f"{config.GATEWAY_URL}/storage/movies/{storage_id}"
         )
 
 
-def send_request(request, *args, **kwargs) -> httpx.Response | None:
-    """Sends the given request and handles errors from the Response."""
+def send_request(request_func, *args, **kwargs) -> httpx.Response | None:
+
     try:
-        response = request(*args, **kwargs)
+        response = request_func(*args, **kwargs)
         response.raise_for_status()
         return response
+
     except httpx.ConnectTimeout:
-        print("Gateway timed out connecting.")
+        print(f"Gateway timed out while connection was being established.")
     except httpx.ReadTimeout:
         print("Gateway took too long to respond.")
     except httpx.ConnectError:
-        print("Could not reach gateway.")
+        print("Connection with gateway could not be reached.")
     except httpx.HTTPStatusError as e:
-        print(f"HTTP error {e.response.status_code}: {e.response.json()}")
+        print(f"HTTP error caught:\n    CODE - {e.response.status_code}:\n    DETAIL - {e.response.text}")
+    except httpx.RequestError as e:
+        print(f"An unexpected error occurred while requesting: {e}")
+
     return None
+
+
+
+def send_file(self):
+    pass
 
 
 
