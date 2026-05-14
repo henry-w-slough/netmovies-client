@@ -1,15 +1,9 @@
 import asyncio
 import aiofiles
+import config
 
-async def parse_movie(src:str):
+def parse_movie(src:str):
 
-    async with aiofiles.open(src, "rb") as file:
-
-        while True:
-            chunk = await file.read(1024 * 1024) #1MB reads
-
-            if not chunk:
-                #EOF
-                break
-
+    with open(src, "rb") as f:
+        while chunk := f.read(config.DEFAULT_READ_SIZE):
             yield chunk

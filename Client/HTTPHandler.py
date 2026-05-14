@@ -2,9 +2,10 @@ import httpx
 import config
 import uuid
 import os
+import Utility.MovieParser as MovieParser
 
 
-def create_movie(name: str, description: str) -> dict | None:
+def create_movie(name: str, description: str, src:str) -> dict | None:
     
     with httpx.Client() as client:
         
@@ -15,7 +16,7 @@ def create_movie(name: str, description: str) -> dict | None:
 
         metadata_response = send_request(client.post,
             f"{config.GATEWAY_URL}/metadata/movie/createMovie",
-            json=movie_json
+            json=movie_json,
         )
         if metadata_response is None:
             return None
@@ -24,7 +25,8 @@ def create_movie(name: str, description: str) -> dict | None:
 
         storage_response = send_request(client.post,
             f"{config.GATEWAY_URL}/storage/movies",
-            json={"storage_id": new_movie["storageId"]}
+            json = {"storage_id": new_movie["storageId"]},
+            content = MovieParser.parse_movie(src)
         )
 
         if storage_response is None:

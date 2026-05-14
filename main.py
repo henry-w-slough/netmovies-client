@@ -10,7 +10,7 @@ while running:
 
 
     if user_input == "create":
-        (ClientHTTP.create_movie(input("Name of movie: "), input("Description of movie (Optional): ")))
+        (ClientHTTP.create_movie(input("Name of movie: "), input("Description of movie (Optional): "), input("Path of file source: ")))
 
     elif user_input == "delete":
 
