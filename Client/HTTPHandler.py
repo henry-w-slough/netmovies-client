@@ -5,16 +5,16 @@ import os
 import Utility.MovieParser as MovieParser
 
 
-def create_movie(name: str, description: str, src:str) -> dict | None:
+async def create_movie(name: str, description: str, src:str) -> dict | None:
     
-    with httpx.Client() as client:
+    async with httpx.AsyncClient() as client:
         
         if len(description) == 0:
             movie_json = {"name": name}
         else:
             movie_json = {"name": name, "description": description}
 
-        metadata_response = send_request(client.post,
+        metadata_response = await send_request(client.post,
             f"{config.GATEWAY_URL}/metadata/movie/createMovie",
             json=movie_json,
         )
@@ -23,7 +23,7 @@ def create_movie(name: str, description: str, src:str) -> dict | None:
 
         new_movie = metadata_response.json()
 
-        storage_response = send_request(client.post,
+        storage_response = await send_request(client.post,
             f"{config.GATEWAY_URL}/storage/movies",
             json = {"storage_id": new_movie["storageId"]},
             content = MovieParser.parse_movie(src)
@@ -35,9 +35,10 @@ def create_movie(name: str, description: str, src:str) -> dict | None:
     return new_movie
 
 
-def get_all_movies() -> dict | None:
-    with httpx.Client() as client:
-        metadata_response = send_request(client.get,
+async def get_all_movies() -> dict | None:
+
+    async with httpx.AsyncClient() as client:
+        metadata_response = await send_request(client.get,
             f"{config.GATEWAY_URL}/metadata/movie/getAllMovies"
         )
         if metadata_response is None:
@@ -46,19 +47,20 @@ def get_all_movies() -> dict | None:
 
 
 
-def delete_movie_by_storage_id(storage_id: uuid.UUID) -> httpx.Response | None:
-    with httpx.Client() as client:
-        return send_request(client.delete,
+async def delete_movie_by_storage_id(storage_id: uuid.UUID) -> httpx.Response | None:
+    
+    async with httpx.AsyncClient() as client:
+        return await send_request(client.delete,
             f"{config.GATEWAY_URL}/metadata/movie/deleteMovieByStorageId/{storage_id}"
-        ) and send_request(client.delete,
+        ) and await send_request(client.delete,
             f"{config.GATEWAY_URL}/storage/movies/{storage_id}"
         )
 
 
-def send_request(request_func, *args, **kwargs) -> httpx.Response | None:
+async def send_request(request_func, *args, **kwargs) -> httpx.Response | None:
 
     try:
-        response = request_func(*args, **kwargs)
+        response = await request_func(*args, **kwargs)
         response.raise_for_status()
         return response
 
