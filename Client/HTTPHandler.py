@@ -3,6 +3,7 @@ import config
 import uuid
 import os
 import Utility.MovieParser as MovieParser
+import json
 
 
 async def create_movie(name: str, description: str, src:str) -> dict | None:
@@ -24,9 +25,9 @@ async def create_movie(name: str, description: str, src:str) -> dict | None:
         new_movie = metadata_response.json()
 
         storage_response = await send_request(client.post,
-            f"{config.GATEWAY_URL}/storage/movies",
-            json = {"storage_id": new_movie["storageId"]},
-            content = MovieParser.parse_movie(src)
+            f"{config.GATEWAY_URL}/storage/movies/{new_movie["storageId"]}",
+            content = MovieParser.parse_movie(src),
+            headers = {"Content-Type": "application/octet-stream"}
         )
 
         if storage_response is None:

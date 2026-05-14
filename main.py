@@ -1,6 +1,5 @@
 import Client.HTTPHandler as ClientHTTP
 import uuid
-import config
 import asyncio
 
 
@@ -26,7 +25,7 @@ async def main():
 
             if all_movies == []:
                 print("No movies have been stored within database.")
-                
+
             elif all_movies != None:
                 for movie in all_movies:
                     print("--------------------")
