@@ -31,7 +31,8 @@ async def create_movie(name: str, description: str, src:str) -> dict | None:
         
         storage_data_response = await send_request(
             client.post,
-            f"{config.STORAGE_ADDRESS}/storage/data/uploadMovieData/"
+            f"{config.STORAGE_ADDRESS}/data/uploadMovieData/{new_movie["storageId"]}",
+            content = MovieParser.parse_movie(src)
         )
 
 
@@ -52,7 +53,7 @@ async def delete_movie_by_storage_id(storage_id: uuid.UUID) -> httpx.Response | 
         return await send_request(client.delete,
             f"{config.GATEWAY_ADDRESS}/metadata/movie/deleteMovieByStorageId/{storage_id}"
         ) and await send_request(client.delete,
-            f"{config.GATEWAY_ADDRESS}/data/deleteMovieByStorageId/{storage_id}"
+            f"{config.GATEWAY_ADDRESS}/storage/directory/deleteMovieByStorageId/{storage_id}"
         )
 
 
